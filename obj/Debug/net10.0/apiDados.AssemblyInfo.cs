@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("apiDados")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+76f0044386413993f0907d416e6800d383615743")]
 [assembly: System.Reflection.AssemblyProductAttribute("apiDados")]
 [assembly: System.Reflection.AssemblyTitleAttribute("apiDados")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
