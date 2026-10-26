@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>apiDados // Console de Gerenciamento de Clientes (MVP)</title>
+  <link rel="stylesheet" href="./css/clientes.css">
+</head>
+<body>
+  <!-- Container de Toasts Flutuantes -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <div class="container">
+    <!-- Barra de Telemetria / Diagnóstico em Tempo Real -->
+    <aside id="dev-banner" class="dev-banner connected" role="status" aria-label="Status do Sistema e Diagnóstico de Conexão">
+      <div class="dev-banner-top">
+        <div class="dev-banner-status">
+          <span class="status-indicator" id="status-indicator"></span>
+          <span id="banner-status-title">Conectando ao backend ASP.NET Core...</span>
+        </div>
+        <div class="dev-banner-tags">
+          <span class="dev-tag dev-tag-cyan" id="tag-env">ENV: DEVELOPMENT</span>
+          <span class="dev-tag dev-tag-success" id="tag-db">DB: SQLITE (WAL)</span>
+          <span class="dev-tag" id="tag-framework">.NET 10 KESTREL</span>
+          <span class="dev-tag dev-tag-amber" id="tag-latency">LATÊNCIA: -- ms</span>
+        </div>
+      </div>
+      <div class="dev-banner-text" id="banner-status-desc">
+        Sincronizando comunicação com a API REST Minimal APIs e o banco SQLite (<code>api-clientes.db</code>)...
+      </div>
+    </aside>
+
+    <!-- Cabeçalho Principal (Developer Console Brand) -->
+    <header class="dev-header">
+      <div class="dev-brand">
+        <div class="dev-brand-icon" aria-hidden="true">
+          <!-- Terminal / Code SVG Icon -->
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 17 10 11 4 5"></polyline>
+            <line x1="12" y1="19" x2="20" y2="19"></line>
+          </svg>
+        </div>
+        <div>
+          <div class="dev-brand-title">
+            apiDados <span class="dev-brand-badge">MVP v1.0.0</span>
+          </div>
+          <p class="dev-brand-sub">Console de Gerenciamento de Clientes &bull; ASP.NET Core com Entity Framework Core</p>
+        </div>
+      </div>
+
+      <div class="dev-header-actions">
+        <button type="button" id="btn-recarregar" class="btn btn-secondary btn-sm" title="Recarregar dados do backend">
+          <!-- Refresh SVG Icon -->
+          <svg id="icon-refresh" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          Sincronizar
+        </button>
+      </div>
+    </header>
+
+    <!-- Grid de Métricas de Apresentação (MVP Telemetry Cards) -->
+    <section class="metrics-grid" aria-label="Métricas do Sistema">
+      <div class="metric-card">
+        <div class="metric-header">
+          <span>Registros Totais</span>
+          <span class="metric-icon">
+            <!-- Database Icon -->
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+            </svg>
+          </span>
+        </div>
+        <div class="metric-value" id="card-total-clientes">0</div>
+        <div class="metric-desc">Clientes no SQLite</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <span>Camada de Dados</span>
+          <span class="metric-icon">
+            <!-- Server Icon -->
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+              <line x1="6" y1="6" x2="6.01" y2="6"></line>
+              <line x1="6" y1="18" x2="6.01" y2="18"></line>
+            </svg>
+          </span>
+        </div>
+        <div class="metric-value" style="font-size: 1.25rem;">SQLite 3</div>
+        <div class="metric-desc">EF Core ORM Integrado</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <span>Rotas RESTful</span>
+          <span class="metric-icon">
+            <!-- Route Icon -->
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="18" cy="18" r="3"></circle>
+              <circle cx="6" cy="6" r="3"></circle>
+              <path d="M13 6h3a2 2 0 0 1 2 2v7"></path>
+              <line x1="6" y1="9" x2="6" y2="21"></line>
+            </svg>
+          </span>
+        </div>
+        <div class="metric-value" style="font-size: 1.25rem;">5 Rotas</div>
+        <div class="metric-desc">GET, POST, PUT, DELETE</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <span>Tempo de Resposta</span>
+          <span class="metric-icon">
+            <!-- Activity Icon -->
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+          </span>
+        </div>
+        <div class="metric-value" id="card-ping-latency" style="color: var(--accent-emerald);">--</div>
+        <div class="metric-desc">Latência de comunicação HTTP</div>
+      </div>
+    </section>
+
+    <!-- Formulário de Operação de Dados (Create / Update) -->
+    <section class="card" aria-labelledby="form-card-title">
+      <div class="card-header-flex">
+        <div class="card-title-group">
+          <h2 id="form-card-title" class="card-title">
+            <!-- Code / Form Icon -->
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="3" x2="9" y2="21"></line>
+            </svg>
+            Operação de Registro
+          </h2>
+          <p class="card-subtitle">Persistência direta na base SQLite via requisição RESTful autenticada localmente.</p>
+        </div>
+        <div id="form-action-badge">
+          <span class="method-pill method-post">POST /api/cliente</span>
+        </div>
+      </div>
+
+      <form id="form-cliente" novalidate>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="cliente-nome" class="form-label">
+              <span>Nome Completo</span>
+              <span class="form-label-tag">string *</span>
+            </label>
+            <div class="input-container">
+              <span class="input-icon">
+                <!-- User Icon -->
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </span>
+              <input 
+                type="text" 
+                id="cliente-nome" 
+                name="nome" 
+                class="form-control"
+                placeholder="Ex.: Gustavo Costa" 
+                required
+              >
+            </div>
+            <span class="form-help">Identificador nominal do registro</span>
+          </div>
+
+          <div class="form-group">
+            <label for="cliente-email" class="form-label">
+              <span>Endereço de E-mail</span>
+              <span class="form-label-tag">string *</span>
+            </label>
+            <div class="input-container">
+              <span class="input-icon">
+                <!-- Mail Icon -->
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                </svg>
+              </span>
+              <input 
+                type="email" 
+                id="cliente-email" 
+                name="email" 
+                class="form-control"
+                placeholder="Ex.: gustavo@email.com" 
+                required
+              >
+            </div>
+            <span class="form-help">E-mail para contato corporativo</span>
+          </div>
+
+          <div class="form-group">
+            <label for="cliente-telefone" class="form-label">
+              <span>Telefone de Contato</span>
+              <span class="form-label-tag">string *</span>
+            </label>
+            <div class="input-container">
+              <span class="input-icon">
+                <!-- Phone Icon -->
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                </svg>
+              </span>
+              <input 
+                type="tel" 
+                id="cliente-telefone" 
+                name="telefone" 
+                class="form-control"
+                placeholder="Ex.: 51999999999" 
+                required
+              >
+            </div>
+            <span class="form-help">Número telefônico com código DDD</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" id="btn-salvar" class="btn btn-primary">
+            <!-- Plus Icon -->
+            <svg id="btn-salvar-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span id="btn-salvar-text">Cadastrar Registro</span>
+          </button>
+          <button type="button" id="btn-cancelar" class="btn btn-secondary" style="display: none;">
+            <!-- X Icon -->
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            Cancelar Edição
+          </button>
+          <button type="button" id="btn-limpar" class="btn btn-outline" title="Limpar campos do formulário">
+            Limpar
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Tabela / Explorador de Registros SQL -->
+    <section class="card" aria-labelledby="lista-card-title">
+      <div class="table-toolbar">
+        <div>
+          <h2 id="lista-card-title" class="card-title">
+            <!-- Database Grid Icon -->
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+            </svg>
+            Registros Persistidos
+          </h2>
+          <p class="card-subtitle" style="margin-bottom: 0;">Visualização dos dados na tabela <code>Clientes</code> do SQLite.</p>
+        </div>
+
+        <div class="search-box">
+          <span class="search-icon">
+            <!-- Search Icon -->
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
+          <input 
+            type="search" 
+            id="filtro-pesquisa" 
+            class="search-input" 
+            placeholder="Filtrar por nome, e-mail ou telefone..."
+            aria-label="Filtrar clientes cadastrados"
+          >
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="clients-table" aria-label="Tabela de clientes integrados ao banco de dados">
+          <thead>
+            <tr>
+              <th scope="col" style="width: 80px;">ID</th>
+              <th scope="col">Cliente</th>
+              <th scope="col">E-mail</th>
+              <th scope="col">Telefone</th>
+              <th scope="col" style="width: 180px;">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-clientes-corpo">
+            <!-- Conteúdo dinâmico injetado via JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Terminal de Auditoria HTTP (Live Request Telemetry) -->
+    <section class="dev-console-card" aria-label="Console de Telemetria de Requisições">
+      <div class="dev-console-header">
+        <div class="dev-console-window-controls">
+          <span class="window-dot dot-red"></span>
+          <span class="window-dot dot-yellow"></span>
+          <span class="window-dot dot-green"></span>
+        </div>
+        <div class="dev-console-title">
+          <!-- Terminal Icon -->
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 17 10 11 4 5"></polyline>
+            <line x1="12" y1="19" x2="20" y2="19"></line>
+          </svg>
+          HTTP Telemetry Log // ASP.NET Core Minimal APIs
+        </div>
+        <button type="button" id="btn-limpar-console" class="btn btn-outline btn-sm" title="Limpar terminal de auditoria">
+          <!-- Eraser / Trash Icon -->
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18"></path>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          Limpar
+        </button>
+      </div>
+      <div class="dev-console-body" id="dev-console-stream">
+        <!-- Linhas de log em tempo real -->
+      </div>
+    </section>
+
+    <!-- Rodapé Desenvolvedor -->
+    <footer class="dev-footer">
+      <p>AP1 Backend Architecture &bull; Integrado com <code>ASP.NET Core (.NET 10)</code> e <code>Entity Framework Core (SQLite)</code>.</p>
+      <p>Endpoints REST: <code>GET /api/cliente</code> &bull; <code>POST /api/cliente</code> &bull; <code>GET /api/cliente/{id}</code> &bull; <code>PUT /api/cliente/{id}</code> &bull; <code>DELETE /api/cliente/{id}</code></p>
+    </footer>
+  </div>
+
+  <!-- Modal de Confirmação de Exclusão (Custom Developer Modal) -->
+  <div id="modal-confirmacao" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-confirm-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-icon-danger" aria-hidden="true">
+          <!-- Alert Triangle SVG Icon -->
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </div>
+        <h3 id="modal-confirm-title" class="modal-title">Confirmar Exclusão de Registro</h3>
+      </div>
+      <div class="modal-body">
+        <p id="modal-confirm-message">
+          Deseja realmente remover o registro <code id="modal-cliente-id">#ID</code> do banco de dados SQLite?
+        </p>
+        <p style="font-size: 0.78rem; color: var(--text-faint); margin-top: 0.5rem;">
+          Esta operação executará uma requisição <code>DELETE /api/cliente/{id}</code> e removerá os dados de forma permanente da tabela.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btn-modal-cancelar" class="btn btn-secondary btn-sm">
+          Cancelar
+        </button>
+        <button type="button" id="btn-modal-confirmar" class="btn btn-action-delete btn-sm">
+          <!-- Trash Icon -->
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+          </svg>
+          Executar Exclusão
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/clientes.js"></script>
+</body>
+</html>
