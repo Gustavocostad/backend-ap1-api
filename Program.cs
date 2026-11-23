@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using APIDADOS.Models;
+using APIDADOS.Data;using APIDADOS.Dtos;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +24,18 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+
+app.UseExceptionHandler((errorApp => 
+    {
+        errorApp.Run(async context => 
+        {
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsJsonAsync(new { error = "Ocorreu um erro ao processar a requisição." });
+        });
+    }));
+
 
 // Garantir a criação do banco de dados SQLite e aplicar carga inicial se estiver vazio
 using (var scope = app.Services.CreateScope())
@@ -77,6 +92,12 @@ app.MapGet("/api/cliente/{id:int}", async (int id, ApiDbContext db) =>
 
     return Results.Ok(cliente);
 });
+
+// Aula de catch de erros
+//app.MapGet("api/teste-erro", () => 
+//{
+//    throw new InvalidOperationException("Erro teste");
+//});
 
 // 4. Cadastrar novo cliente
 app.MapPost("/api/cliente", async (ClienteEntrada dados, ApiDbContext db) =>
@@ -141,34 +162,4 @@ app.MapDelete("/api/cliente/{id:int}", async (int id, ApiDbContext db) =>
     return Results.NoContent();
 });
 
-app.Run();
-
-// Definições de Modelos e DbContext
-public class ClienteBase
-{
-    public int Id { get; set; }
-    public string Nome { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string Telefone { get; set; } = string.Empty;
-
-    public ClienteBase() { }
-
-    public ClienteBase(int id, string nome, string email, string telefone)
-    {
-        Id = id;
-        Nome = nome;
-        Email = email;
-        Telefone = telefone;
-    }
-}
-
-public record ClienteEntrada(string Nome, string Email, string Telefone);
-
-public class ApiDbContext : DbContext
-{
-    public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options)
-    {
-    }
-
-    public DbSet<ClienteBase> Clientes => Set<ClienteBase>();
-}
+    app.Run();

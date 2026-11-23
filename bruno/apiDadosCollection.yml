@@ -1,0 +1,192 @@
+opencollection: 1.0.0
+info:
+  name: apiDados
+  description: Collection local da API de clientes (AS). Base URL http://localhost:5289. Após o POST, use o id retornado nas demais requisições.
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ''
+      port: ''
+      auth:
+        username: ''
+        password: ''
+      bypassProxy: ''
+items:
+  - info:
+      name: getClientes
+      type: http
+      seq: 1
+      description: GET listagem — esperado 200
+    http:
+      method: GET
+      url: http://localhost:5289/api/cliente
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+      forwardAuthorizationHeader: false
+  - info:
+      name: addCliente
+      type: http
+      seq: 2
+      description: POST criar — esperado 201; anote o id retornado
+    http:
+      method: POST
+      url: http://localhost:5289/api/cliente
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "nome": "Gustavo",
+            "email": "gustavo@email.com",
+            "telefone": "51999999999"
+          }
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+      forwardAuthorizationHeader: false
+  - info:
+      name: getClienteId
+      type: http
+      seq: 3
+      description: GET por id criado — esperado 200; troque o id na URL pelo retornado no POST
+    http:
+      method: GET
+      url: http://localhost:5289/api/cliente/3
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+      forwardAuthorizationHeader: false
+  - info:
+      name: putCliente
+      type: http
+      seq: 4
+      description: PUT atualizar — esperado 200; troque o id na URL pelo retornado no POST
+    http:
+      method: PUT
+      url: http://localhost:5289/api/cliente/3
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "nome": "JK",
+            "email": "jk@email.com",
+            "telefone": "51988887777"
+          }
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+      forwardAuthorizationHeader: false
+  - info:
+      name: deleteCliente
+      type: http
+      seq: 5
+      description: DELETE — esperado 204 sem corpo; troque o id na URL pelo retornado no POST
+    http:
+      method: DELETE
+      url: http://localhost:5289/api/cliente/3
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+      forwardAuthorizationHeader: false
+  - info:
+      name: getClienteAposDelete
+      type: http
+      seq: 6
+      description: GET após exclusão — esperado 404; use o mesmo id do DELETE
+    http:
+      method: GET
+      url: http://localhost:5289/api/cliente/3
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+      forwardAuthorizationHeader: false
+  - info:
+      name: addClientePersistencia
+      type: http
+      seq: 7
+      description: POST segundo registro para teste de persistência — esperado 201; anote o id, reinicie a API e use getClientePersistencia
+    http:
+      method: POST
+      url: http://localhost:5289/api/cliente
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "nome": "Cliente Persistente",
+            "email": "persistente@email.com",
+            "telefone": "51977776666"
+          }
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+      forwardAuthorizationHeader: false
+  - info:
+      name: getClientePersistencia
+      type: http
+      seq: 8
+      description: GET após reiniciar a API — esperado 200 com o mesmo registro; troque o id pelo do addClientePersistencia
+    http:
+      method: GET
+      url: http://localhost:5289/api/cliente/4
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+      forwardAuthorizationHeader: false
+  - info:
+      name: statusApi
+      type: http
+      seq: 9
+      description: Status da API (ambiente local)
+    http:
+      method: GET
+      url: http://localhost:5289/status
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+      forwardAuthorizationHeader: false
+bundled: true
+extensions:
+  bruno:
+    ignore:
+      - node_modules
+      - .git
+    exportedAt: '2026-11-22T22:58:00.000Z'
+    exportedUsing: Bruno
